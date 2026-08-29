@@ -206,6 +206,15 @@ export default function POSPage() {
           style={{ fontFamily: "'Lora', serif" }}>
           Kelola inventaris dan stok menu cafe Anda
         </p>
+        {/* Navigation */}
+        <div className="flex justify-center gap-3 mt-4">
+          <a href="/" className="pill on">
+            ☕ Produk
+          </a>
+          <a href="/orders" className="pill">
+            🛒 Orderan
+          </a>
+        </div>
       </header>
 
       {/* ── STATS ── */}
