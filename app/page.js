@@ -110,7 +110,7 @@ export default function POSPage() {
 
   /* ────────────────────────────────── */
   return (
-    <div className="max-w-[1200px] mx-auto px-4 sm:px-5 py-6 sm:py-8">
+    <div className="max-w-[1200px] mx-auto px-6 sm:px-8 lg:px-10 py-6 sm:py-8">
       {/* ── Header ── */}
       <div className="v-card mb-5 sm:mb-6 text-center">
         <div className="v-float mx-auto mb-2 sm:mb-3 w-[50px] h-[50px] sm:w-[60px] sm:h-[60px] rounded-full flex items-center justify-center"
