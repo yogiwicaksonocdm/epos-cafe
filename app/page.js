@@ -138,12 +138,12 @@ export default function POSPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-6">
       {/* Header */}
-      <header className="text-center py-6">
-        <div className="vintage-card p-6 md:p-8 inline-block mx-auto">
+      <header>
+        <div className="vintage-card p-6 md:p-8 text-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="float-icon p-4 bg-gradient-to-br from-[#C04000] to-[#8B2500] rounded-full shadow-lg border-3 border-[#3B2316]" style={{borderWidth: '3px'}}>
+            <div className="float-icon p-4 bg-gradient-to-br from-[#C04000] to-[#8B2500] rounded-full shadow-lg" style={{border: '3px solid #3B2316'}}>
               <Coffee className="w-8 h-8 text-[#FFF8E7]" />
             </div>
             <div>
@@ -165,7 +165,7 @@ export default function POSPage() {
       </header>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="stat-card-vintage p-5">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-[#FFF8E7] border-2 border-[#5C3D2E] rounded-xl text-[#C04000]">
@@ -264,9 +264,9 @@ export default function POSPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Form Tambah/Edit */}
-        <div className="vintage-card p-6 sticky top-6">
+        <div className="vintage-card p-5 md:p-6 sticky top-6">
           <h2
             className="text-lg font-bold mb-5 flex items-center gap-2 text-[#3B2316]"
             style={{ fontFamily: "'Fredoka', sans-serif" }}
@@ -413,16 +413,16 @@ export default function POSPage() {
 
         {/* Tabel List Produk */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Filter & Pencarian */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* Filter & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[#8B7355]" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B7355]" />
               <input
                 type="text"
                 placeholder="Cari nama produk..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="vintage-input w-full pl-10"
+                className="vintage-input w-full pl-10 h-[42px]"
               />
             </div>
           </div>
@@ -443,16 +443,16 @@ export default function POSPage() {
           </div>
 
           {/* Table Container */}
-          <div className="vintage-card overflow-hidden">
+          <div className="vintage-card overflow-hidden mt-2">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm vintage-table">
                 <thead>
                   <tr>
-                    <th className="p-4">Produk</th>
-                    <th className="p-4">Kategori</th>
-                    <th className="p-4">Harga</th>
-                    <th className="p-4">Stok</th>
-                    <th className="p-4 text-right">Aksi</th>
+                    <th>Produk</th>
+                    <th>Kategori</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th className="text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -460,7 +460,7 @@ export default function POSPage() {
                     <tr>
                       <td
                         colSpan="5"
-                        className="p-10 text-center"
+                        className="px-4 py-12 text-center"
                       >
                         <div className="flex flex-col items-center gap-2">
                           <span className="text-4xl">📭</span>
@@ -479,7 +479,7 @@ export default function POSPage() {
                   ) : (
                     filteredProducts.map((p) => (
                       <tr key={p.id}>
-                        <td className="p-4">
+                        <td className="px-4 py-3.5">
                           <span
                             className="font-semibold text-[#3B2316]"
                             style={{ fontFamily: "'Lora', serif" }}
@@ -487,7 +487,7 @@ export default function POSPage() {
                             {categoryIcons[p.category] || "📦"} {p.name}
                           </span>
                         </td>
-                        <td className="p-4">
+                        <td className="px-4 py-3.5">
                           <span
                             className={`badge-vintage ${
                               categoryColors[p.category]?.badge ||
@@ -497,7 +497,7 @@ export default function POSPage() {
                             {p.category || "Umum"}
                           </span>
                         </td>
-                        <td className="p-4">
+                        <td className="px-4 py-3.5">
                           <span
                             className="font-bold text-[#6B7B3A]"
                             style={{ fontFamily: "'Fredoka', sans-serif" }}
@@ -505,7 +505,7 @@ export default function POSPage() {
                             Rp {p.price?.toLocaleString("id-ID")}
                           </span>
                         </td>
-                        <td className="p-4">
+                        <td className="px-4 py-3.5">
                           <span
                             className={`badge-vintage ${
                               p.stock <= 5
@@ -517,23 +517,23 @@ export default function POSPage() {
                             {p.stock}
                           </span>
                         </td>
-                        <td className="p-4 text-right space-x-1">
-                          <button
-                            onClick={() => handleEdit(p)}
-                            className="p-2 text-[#8B7355] hover:text-[#D4A843] hover:bg-[#FFF8E7] border-2 border-transparent hover:border-[#D4A843] rounded-xl transition-all"
-                            title="Edit"
-                            style={{ borderRadius: "12px" }}
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className="p-2 text-[#8B7355] hover:text-[#A0322E] hover:bg-[#FFF0EE] border-2 border-transparent hover:border-[#A0322E] rounded-xl transition-all"
-                            title="Hapus"
-                            style={{ borderRadius: "12px" }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <td className="px-4 py-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleEdit(p)}
+                              className="p-2 text-[#8B7355] hover:text-[#D4A843] hover:bg-[#FFF8E7] border-2 border-transparent hover:border-[#D4A843] rounded-xl transition-all"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              className="p-2 text-[#8B7355] hover:text-[#A0322E] hover:bg-[#FFF0EE] border-2 border-transparent hover:border-[#A0322E] rounded-xl transition-all"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -544,7 +544,7 @@ export default function POSPage() {
           </div>
 
           {/* Footer credit */}
-          <div className="text-center pt-2">
+          <div className="text-center pt-4 pb-2">
             <p
               className="text-xs text-[#B8A08A] italic"
               style={{ fontFamily: "'Lora', serif" }}
