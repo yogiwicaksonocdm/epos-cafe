@@ -23,6 +23,9 @@ import {
   AlertTriangle,
   Layers,
   ShoppingBag,
+  X,
+  Save,
+  Sparkles,
 } from "lucide-react";
 
 export default function POSPage() {
@@ -90,6 +93,7 @@ export default function POSPage() {
     setCategory(product.category || "Kopi");
     setPrice(product.price);
     setStock(product.stock);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelEdit = () => {
@@ -117,55 +121,144 @@ export default function POSPage() {
   // Statistik Ringkasan
   const lowStockCount = products.filter((p) => p.stock <= 5).length;
   const totalCategories = new Set(products.map((p) => p.category)).size;
+  const totalStock = products.reduce((acc, p) => acc + (p.stock || 0), 0);
+
+  const categoryColors = {
+    Kopi: { bg: "bg-amber-50", border: "border-amber-700", text: "text-amber-800", badge: "bg-amber-100 border-amber-600 text-amber-800" },
+    "Non-Kopi": { bg: "bg-teal-50", border: "border-teal-700", text: "text-teal-800", badge: "bg-teal-100 border-teal-600 text-teal-800" },
+    Makanan: { bg: "bg-orange-50", border: "border-orange-700", text: "text-orange-800", badge: "bg-orange-100 border-orange-600 text-orange-800" },
+    Snack: { bg: "bg-rose-50", border: "border-rose-700", text: "text-rose-800", badge: "bg-rose-100 border-rose-600 text-rose-800" },
+  };
+
+  const categoryIcons = {
+    Kopi: "☕",
+    "Non-Kopi": "🧋",
+    Makanan: "🍽️",
+    Snack: "🍪",
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-tr from-amber-600 to-orange-500 rounded-2xl shadow-lg shadow-orange-500/20">
-            <Coffee className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              ePOS Cafe Manager
-            </h1>
-            <p className="text-sm text-slate-400">Kelola inventaris dan stok menu cafe Anda</p>
+      <header className="text-center py-6">
+        <div className="vintage-card p-6 md:p-8 inline-block mx-auto">
+          <div className="flex flex-col items-center gap-3">
+            <div className="float-icon p-4 bg-gradient-to-br from-[#C04000] to-[#8B2500] rounded-full shadow-lg border-3 border-[#3B2316]" style={{borderWidth: '3px'}}>
+              <Coffee className="w-8 h-8 text-[#FFF8E7]" />
+            </div>
+            <div>
+              <h1
+                className="text-3xl md:text-4xl font-bold text-[#3B2316]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                ✦ ePOS Cafe Manager ✦
+              </h1>
+              <p
+                className="text-sm text-[#8B7355] mt-1 italic"
+                style={{ fontFamily: "'Lora', serif" }}
+              >
+                Kelola inventaris dan stok menu cafe Anda dengan gaya
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Ringkasan Dashboard / Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-800/60 border border-slate-700/50 p-5 rounded-2xl flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Produk</p>
-            <h3 className="text-2xl font-bold text-white mt-1">{products.length}</h3>
-          </div>
-          <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
-            <ShoppingBag className="w-6 h-6" />
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="stat-card-vintage p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#FFF8E7] border-2 border-[#5C3D2E] rounded-xl text-[#C04000]">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <div>
+              <p
+                className="text-xs font-semibold text-[#8B7355] uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Total Produk
+              </p>
+              <h3
+                className="text-2xl font-bold text-[#3B2316]"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                {products.length}
+              </h3>
+            </div>
           </div>
         </div>
 
-        <div className="bg-slate-800/60 border border-slate-700/50 p-5 rounded-2xl flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Kategori Menu</p>
-            <h3 className="text-2xl font-bold text-white mt-1">{totalCategories}</h3>
-          </div>
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-            <Layers className="w-6 h-6" />
+        <div className="stat-card-vintage p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#FFF8E7] border-2 border-[#5C3D2E] rounded-xl text-[#6B7B3A]">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <p
+                className="text-xs font-semibold text-[#8B7355] uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Kategori
+              </p>
+              <h3
+                className="text-2xl font-bold text-[#3B2316]"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                {totalCategories}
+              </h3>
+            </div>
           </div>
         </div>
 
-        <div className="bg-slate-800/60 border border-slate-700/50 p-5 rounded-2xl flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Stok Menipis (≤5)</p>
-            <h3 className={`text-2xl font-bold mt-1 ${lowStockCount > 0 ? 'text-amber-400' : 'text-white'}`}>
-              {lowStockCount}
-            </h3>
+        <div className="stat-card-vintage p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#FFF8E7] border-2 border-[#5C3D2E] rounded-xl text-[#3A7D7E]">
+              <PackageCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <p
+                className="text-xs font-semibold text-[#8B7355] uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Total Stok
+              </p>
+              <h3
+                className="text-2xl font-bold text-[#3B2316]"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                {totalStock}
+              </h3>
+            </div>
           </div>
-          <div className={`p-3 rounded-xl ${lowStockCount > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-700/50 text-slate-400'}`}>
-            <AlertTriangle className="w-6 h-6" />
+        </div>
+
+        <div className="stat-card-vintage p-5">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-3 border-2 rounded-xl ${
+                lowStockCount > 0
+                  ? "bg-[#FFF3E0] border-[#C04000] text-[#C04000]"
+                  : "bg-[#FFF8E7] border-[#5C3D2E] text-[#6B7B3A]"
+              }`}
+            >
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <p
+                className="text-xs font-semibold text-[#8B7355] uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Stok Menipis
+              </p>
+              <h3
+                className={`text-2xl font-bold ${
+                  lowStockCount > 0 ? "text-[#C04000]" : "text-[#3B2316]"
+                }`}
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                {lowStockCount}
+              </h3>
+            </div>
           </div>
         </div>
       </div>
@@ -173,78 +266,144 @@ export default function POSPage() {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Form Tambah/Edit */}
-        <div className="bg-slate-800/80 border border-slate-700/60 p-6 rounded-2xl shadow-xl backdrop-blur-sm sticky top-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
-            {editingId ? <Edit3 className="w-5 h-5 text-amber-400" /> : <Plus className="w-5 h-5 text-amber-400" />}
-            {editingId ? "Edit Produk" : "Tambah Produk Baru"}
+        <div className="vintage-card p-6 sticky top-6">
+          <h2
+            className="text-lg font-bold mb-5 flex items-center gap-2 text-[#3B2316]"
+            style={{ fontFamily: "'Fredoka', sans-serif" }}
+          >
+            {editingId ? (
+              <>
+                <Edit3 className="w-5 h-5 text-[#C04000]" />
+                <span>Edit Produk</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-5 h-5 text-[#6B7B3A]" />
+                <span>Tambah Produk Baru</span>
+              </>
+            )}
           </h2>
+
+          {editingId && (
+            <div className="mb-4 p-3 bg-[#FFF3E0] border-2 border-dashed border-[#D4A843] rounded-xl text-center">
+              <p
+                className="text-xs text-[#8B6914] font-medium"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                ✏️ Sedang mengedit produk
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Nama Produk</label>
+              <label
+                className="block text-xs font-semibold text-[#8B7355] mb-1.5 uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Nama Produk
+              </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Avocado Coffee Shake"
-                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition"
+                className="vintage-input w-full"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Kategori</label>
+              <label
+                className="block text-xs font-semibold text-[#8B7355] mb-1.5 uppercase tracking-wide"
+                style={{ fontFamily: "'Fredoka', sans-serif" }}
+              >
+                Kategori
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition text-slate-200"
+                className="vintage-input w-full"
               >
-                <option value="Kopi">Kopi</option>
-                <option value="Non-Kopi">Non-Kopi</option>
-                <option value="Makanan">Makanan</option>
-                <option value="Snack">Snack</option>
+                <option value="Kopi">☕ Kopi</option>
+                <option value="Non-Kopi">🧋 Non-Kopi</option>
+                <option value="Makanan">🍽️ Makanan</option>
+                <option value="Snack">🍪 Snack</option>
               </select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Harga (Rp)</label>
+                <label
+                  className="block text-xs font-semibold text-[#8B7355] mb-1.5 uppercase tracking-wide"
+                  style={{ fontFamily: "'Fredoka', sans-serif" }}
+                >
+                  Harga (Rp)
+                </label>
                 <input
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="25000"
-                  className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition"
+                  className="vintage-input w-full"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Stok Awal</label>
+                <label
+                  className="block text-xs font-semibold text-[#8B7355] mb-1.5 uppercase tracking-wide"
+                  style={{ fontFamily: "'Fredoka', sans-serif" }}
+                >
+                  Stok Awal
+                </label>
                 <input
                   type="number"
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
                   placeholder="20"
-                  className="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition"
+                  className="vintage-input w-full"
                   required
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-medium py-2.5 rounded-xl text-sm transition duration-150 disabled:opacity-50 shadow-lg shadow-amber-600/20"
+                className="vintage-btn flex-1 flex items-center justify-center gap-2 text-white"
+                style={{
+                  background: editingId
+                    ? "linear-gradient(135deg, #D4A843, #B8860B)"
+                    : "linear-gradient(135deg, #6B7B3A, #4A5A28)",
+                  color: "white",
+                }}
               >
-                {loading ? "Menyimpan..." : editingId ? "Perbarui Produk" : "Tambah Produk"}
+                {loading ? (
+                  "Menyimpan..."
+                ) : editingId ? (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Perbarui
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Tambah Produk
+                  </>
+                )}
               </button>
               {editingId && (
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium px-4 py-2.5 rounded-xl text-sm transition"
+                  className="vintage-btn flex items-center gap-1"
+                  style={{
+                    background: "#8B7355",
+                    color: "white",
+                  }}
                 >
+                  <X className="w-4 h-4" />
                   Batal
                 </button>
               )}
@@ -254,36 +413,40 @@ export default function POSPage() {
 
         {/* Tabel List Produk */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Baris Filter & Pencarian */}
+          {/* Filter & Pencarian */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[#8B7355]" />
               <input
                 type="text"
                 placeholder="Cari nama produk..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-800/80 border border-slate-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition"
+                className="vintage-input w-full pl-10"
               />
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="bg-slate-800/80 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 transition text-slate-300"
-            >
-              <option value="Semua">Semua Kategori</option>
-              <option value="Kopi">Kopi</option>
-              <option value="Non-Kopi">Non-Kopi</option>
-              <option value="Makanan">Makanan</option>
-              <option value="Snack">Snack</option>
-            </select>
           </div>
 
-          {/* Tabel Container */}
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl overflow-hidden shadow-xl backdrop-blur-sm">
+          {/* Category Filter Pills */}
+          <div className="flex flex-wrap gap-2">
+            {["Semua", "Kopi", "Non-Kopi", "Makanan", "Snack"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`category-pill ${
+                  selectedCategory === cat ? "active" : ""
+                }`}
+              >
+                {cat === "Semua" ? "📋" : categoryIcons[cat]} {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Table Container */}
+          <div className="vintage-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-900/80 text-slate-400 text-xs uppercase border-b border-slate-700/60">
+              <table className="w-full text-left text-sm vintage-table">
+                <thead>
                   <tr>
                     <th className="p-4">Produk</th>
                     <th className="p-4">Kategori</th>
@@ -292,48 +455,82 @@ export default function POSPage() {
                     <th className="p-4 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/40">
+                <tbody>
                   {filteredProducts.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="p-8 text-center text-slate-500">
-                        Tidak ada produk ditemukan.
+                      <td
+                        colSpan="5"
+                        className="p-10 text-center"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="text-4xl">📭</span>
+                          <p
+                            className="text-[#8B7355] italic"
+                            style={{ fontFamily: "'Lora', serif" }}
+                          >
+                            Tidak ada produk ditemukan.
+                          </p>
+                          <p className="text-xs text-[#B8A08A]">
+                            Coba tambahkan produk baru atau ubah filter pencarian
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     filteredProducts.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-700/20 transition">
-                        <td className="p-4 font-medium text-slate-100">{p.name}</td>
+                      <tr key={p.id}>
                         <td className="p-4">
-                          <span className="px-3 py-1 bg-slate-700/60 border border-slate-600/40 text-amber-300 rounded-full text-xs font-medium">
-                            {p.category || "Umum"}
+                          <span
+                            className="font-semibold text-[#3B2316]"
+                            style={{ fontFamily: "'Lora', serif" }}
+                          >
+                            {categoryIcons[p.category] || "📦"} {p.name}
                           </span>
-                        </td>
-                        <td className="p-4 text-emerald-400 font-semibold">
-                          Rp {p.price?.toLocaleString("id-ID")}
                         </td>
                         <td className="p-4">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                              p.stock <= 5
-                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                                : "bg-slate-700/30 text-slate-300"
+                            className={`badge-vintage ${
+                              categoryColors[p.category]?.badge ||
+                              "bg-[#F5E6C8] border-[#8B7355] text-[#5C3D2E]"
                             }`}
                           >
-                            <PackageCheck className="w-3.5 h-3.5" /> {p.stock}
+                            {p.category || "Umum"}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className="font-bold text-[#6B7B3A]"
+                            style={{ fontFamily: "'Fredoka', sans-serif" }}
+                          >
+                            Rp {p.price?.toLocaleString("id-ID")}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`badge-vintage ${
+                              p.stock <= 5
+                                ? "bg-[#FFF3E0] border-[#C04000] text-[#C04000]"
+                                : "bg-[#F0F7E8] border-[#6B7B3A] text-[#6B7B3A]"
+                            }`}
+                          >
+                            <PackageCheck className="w-3.5 h-3.5" />
+                            {p.stock}
                           </span>
                         </td>
                         <td className="p-4 text-right space-x-1">
                           <button
                             onClick={() => handleEdit(p)}
-                            className="p-2 text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 rounded-lg transition"
+                            className="p-2 text-[#8B7355] hover:text-[#D4A843] hover:bg-[#FFF8E7] border-2 border-transparent hover:border-[#D4A843] rounded-xl transition-all"
                             title="Edit"
+                            style={{ borderRadius: "12px" }}
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 rounded-lg transition"
+                            className="p-2 text-[#8B7355] hover:text-[#A0322E] hover:bg-[#FFF0EE] border-2 border-transparent hover:border-[#A0322E] rounded-xl transition-all"
                             title="Hapus"
+                            style={{ borderRadius: "12px" }}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -344,6 +541,16 @@ export default function POSPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Footer credit */}
+          <div className="text-center pt-2">
+            <p
+              className="text-xs text-[#B8A08A] italic"
+              style={{ fontFamily: "'Lora', serif" }}
+            >
+              ✦ ePOS Cafe Manager — Dibuat dengan ♥ ✦
+            </p>
           </div>
         </div>
       </div>

@@ -2,44 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@700;900&display=swap');
+
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 15, 23, 42;
-  --background-end-rgb: 15, 23, 42;
+  --cream: #FFF8E7;
+  --parchment: #F5E6C8;
+  --warm-brown: #5C3D2E;
+  --dark-brown: #3B2316;
+  --burnt-sienna: #C04000;
+  --olive: #6B7B3A;
+  --dusty-rose: #C9A9A6;
+  --mustard: #D4A843;
+  --teal-vintage: #3A7D7E;
+  --paper-white: #FDF6E3;
+  --ink-black: #2C1810;
+  --vintage-red: #A0322E;
+  --vintage-gold: #B8860B;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  background-color: var(--parchment);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(210, 168, 67, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(192, 64, 0, 0.05) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b8860b' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--ink-black);
 }
 
-/* Custom scrollbar halus untuk tabel dan container */
+/* Custom scrollbar vintage style */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--parchment);
+  border-left: 1px solid #d4b896;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #c9a988;
   border-radius: 9999px;
+  border: 2px solid var(--parchment);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--warm-brown);
 }
 
-/* Menyembunyikan spinner pada input number (Harga & Stok) */
+/* Hide number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -48,4 +61,195 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Vintage card base */
+.vintage-card {
+  background: var(--paper-white);
+  border: 3px solid var(--warm-brown);
+  border-radius: 20px;
+  box-shadow:
+    4px 4px 0px var(--warm-brown),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+}
+
+.vintage-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(92, 61, 46, 0.15);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+/* Vintage input style */
+.vintage-input {
+  background: var(--cream);
+  border: 2px solid #c9a988;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  color: var(--ink-black);
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.vintage-input:focus {
+  outline: none;
+  border-color: var(--burnt-sienna);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.06),
+    0 0 0 3px rgba(192, 64, 0, 0.15);
+}
+
+.vintage-input::placeholder {
+  color: #a89282;
+  font-style: italic;
+}
+
+/* Vintage button */
+.vintage-btn {
+  font-family: 'Fredoka', 'Lora', sans-serif;
+  font-weight: 600;
+  border: 2px solid var(--dark-brown);
+  border-radius: 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 3px 3px 0px var(--dark-brown);
+  position: relative;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.vintage-btn:active {
+  box-shadow: 1px 1px 0px var(--dark-brown);
+  transform: translate(2px, 2px);
+}
+
+.vintage-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 3px 3px 0px var(--dark-brown);
+}
+
+/* Stat card vintage */
+.stat-card-vintage {
+  background: var(--paper-white);
+  border: 2.5px solid var(--warm-brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0px var(--warm-brown);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-vintage:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0px var(--warm-brown);
+}
+
+/* Table vintage */
+.vintage-table thead {
+  background: var(--warm-brown);
+  color: var(--cream);
+}
+
+.vintage-table thead th {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.vintage-table tbody tr {
+  border-bottom: 1.5px dashed #d4c4a8;
+  transition: background 0.15s ease;
+}
+
+.vintage-table tbody tr:hover {
+  background: rgba(212, 168, 67, 0.08);
+}
+
+.vintage-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Badge vintage */
+.badge-vintage {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 500;
+  border: 2px solid;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Decorative divider */
+.vintage-divider {
+  border: none;
+  border-top: 2px dashed var(--dusty-rose);
+  margin: 0;
+  opacity: 0.5;
+}
+
+/* Ornamental corners for header */
+.ornament-left::before,
+.ornament-right::after {
+  content: '✦';
+  font-size: 12px;
+  color: var(--mustard);
+  opacity: 0.6;
+}
+
+/* Category filter buttons */
+.category-pill {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 500;
+  border: 2px solid var(--warm-brown);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--cream);
+  color: var(--warm-brown);
+  box-shadow: 2px 2px 0px var(--warm-brown);
+}
+
+.category-pill:hover {
+  background: var(--parchment);
+}
+
+.category-pill.active {
+  background: var(--burnt-sienna);
+  color: white;
+  border-color: var(--dark-brown);
+  box-shadow: 2px 2px 0px var(--dark-brown);
+}
+
+/* Selection styling */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C3D2E' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* Floating animation for header icon */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.float-icon {
+  animation: float 3s ease-in-out infinite;
 }
