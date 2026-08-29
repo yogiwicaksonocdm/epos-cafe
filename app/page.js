@@ -25,17 +25,15 @@ import {
   ShoppingBag,
   X,
   Save,
-  Loader2,
 } from "lucide-react";
 
-const CATEGORIES = ["Kopi", "Non-Kopi", "Makanan", "Snack"];
-const CATEGORY_ICONS = { Kopi: "☕", "Non-Kopi": "🧋", Makanan: "🍽️", Snack: "🍪" };
-
-const CATEGORY_BADGE = {
-  Kopi: "bg-amber-50 border-amber-200 text-amber-800",
-  "Non-Kopi": "bg-teal-50 border-teal-200 text-teal-800",
-  Makanan: "bg-orange-50 border-orange-200 text-orange-800",
-  Snack: "bg-rose-50 border-rose-200 text-rose-800",
+const CATS = ["Kopi", "Non-Kopi", "Makanan", "Snack"];
+const CAT_ICON = { Kopi: "☕", "Non-Kopi": "🧋", Makanan: "🍽️", Snack: "🍪" };
+const CAT_CLR = {
+  Kopi: "bg-amber-50 border-amber-600 text-amber-800",
+  "Non-Kopi": "bg-teal-50 border-teal-600 text-teal-800",
+  Makanan: "bg-orange-50 border-orange-600 text-orange-800",
+  Snack: "bg-rose-50 border-rose-600 text-rose-800",
 };
 
 export default function POSPage() {
@@ -44,450 +42,306 @@ export default function POSPage() {
   const [category, setCategory] = useState("Kopi");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("Semua");
+  const [editId, setEditId] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
-    return () => unsubscribe();
+    const unsub = onSnapshot(q, (s) =>
+      setProducts(s.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
+    return () => unsub();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!name || !price || stock === "") return;
-    setLoading(true);
+    setBusy(true);
     try {
-      if (editingId) {
-        await updateDoc(doc(db, "products", editingId), {
-          name,
-          category,
-          price: Number(price),
-          stock: Number(stock),
+      if (editId) {
+        await updateDoc(doc(db, "products", editId), {
+          name, category, price: +price, stock: +stock,
         });
-        setEditingId(null);
+        setEditId(null);
       } else {
         await addDoc(collection(db, "products"), {
-          name,
-          category,
-          price: Number(price),
-          stock: Number(stock),
+          name, category, price: +price, stock: +stock,
           createdAt: serverTimestamp(),
         });
       }
-      setName("");
-      setPrice("");
-      setStock("");
-      setCategory("Kopi");
-    } catch (err) {
-      console.error("Gagal menyimpan:", err);
-    } finally {
-      setLoading(false);
-    }
+      setName(""); setPrice(""); setStock(""); setCategory("Kopi");
+    } catch (e) { console.error(e); }
+    finally { setBusy(false); }
   };
 
-  const handleEdit = (p) => {
-    setEditingId(p.id);
+  const startEdit = (p) => {
+    setEditId(p.id);
     setName(p.name);
     setCategory(p.category || "Kopi");
     setPrice(p.price);
     setStock(p.stock);
   };
 
-  const handleCancel = () => {
-    setEditingId(null);
-    setName("");
-    setPrice("");
-    setStock("");
-    setCategory("Kopi");
+  const cancel = () => {
+    setEditId(null);
+    setName(""); setPrice(""); setStock(""); setCategory("Kopi");
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("Yakin ingin menghapus produk ini?")) {
-      await deleteDoc(doc(db, "products", id));
-    }
+  const del = async (id) => {
+    if (confirm("Hapus produk ini?")) await deleteDoc(doc(db, "products", id));
   };
 
-  const filtered = products.filter((p) => {
-    const matchSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
-    return matchSearch && matchCat;
+  const list = products.filter((p) => {
+    const okS = p.name.toLowerCase().includes(search.toLowerCase());
+    const okC = catFilter === "Semua" || p.category === catFilter;
+    return okS && okC;
   });
 
-  const lowStockCount = products.filter((p) => (p.stock || 0) <= 5).length;
-  const totalCategories = new Set(products.map((p) => p.category)).size;
-  const totalStock = products.reduce((a, p) => a + (p.stock || 0), 0);
+  const lowCount = products.filter((p) => p.stock <= 5).length;
+  const catCount = new Set(products.map((p) => p.category)).size;
+  const totStock = products.reduce((a, p) => a + (p.stock || 0), 0);
 
+  /* ── Stat data ── */
+  const stats = [
+    { label: "Produk", val: products.length, icon: ShoppingBag, clr: "text-[#C04000]" },
+    { label: "Kategori", val: catCount, icon: Layers, clr: "text-[#6B7B3A]" },
+    { label: "Total Stok", val: totStock, icon: PackageCheck, clr: "text-[#3A7D7E]" },
+    { label: "Stok Tipis", val: lowCount, icon: AlertTriangle, clr: lowCount ? "text-[#C04000]" : "text-[#6B7B3A]" },
+  ];
+
+  /* ── Empty state ── */
+  const Empty = () => (
+    <div className="text-center py-10">
+      <div className="text-4xl mb-2">📭</div>
+      <p className="text-[#8B7355] italic text-sm" style={{ fontFamily: "'Lora'" }}>
+        Belum ada produk
+      </p>
+      <p className="text-xs text-[#B8A08A] mt-1">
+        Tambah produk baru atau ubah filter pencarian
+      </p>
+    </div>
+  );
+
+  /* ── Mobile product card ── */
+  const MobCard = ({ p }) => (
+    <div className="mcard">
+      <div className="mcard-top">
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-sm text-[#3B2316] truncate" style={{ fontFamily: "'Lora'" }}>
+            {CAT_ICON[p.category] || "📦"} {p.name}
+          </p>
+          <span className={`badge mt-2 ${CAT_CLR[p.category] || "bg-[#F5E6C8] border-[#8B7355] text-[#5C3D2E]"}`}>
+            {p.category || "Umum"}
+          </span>
+        </div>
+        <p className="font-bold text-sm text-[#6B7B3A] whitespace-nowrap" style={{ fontFamily: "'Fredoka'" }}>
+          Rp {p.price?.toLocaleString("id-ID")}
+        </p>
+      </div>
+      <div className="mcard-bot">
+        <span className={`badge ${p.stock <= 5 ? "bg-[#FFF3E0] border-[#C04000] text-[#C04000]" : "bg-[#F0F7E8] border-[#6B7B3A] text-[#6B7B3A]"}`}>
+          <PackageCheck className="w-3.5 h-3.5" /> {p.stock}
+        </span>
+        <div className="ml-auto flex gap-2">
+          <button onClick={() => startEdit(p)} className="btn btn-ic bg-[#D4A843] text-[#3B2316] border-[#3B2316]">
+            <Edit3 className="w-4 h-4" />
+          </button>
+          <button onClick={() => del(p.id)} className="btn btn-ic bg-[#F5E0DE] text-[#C04000] border-[#C04000]">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── Desktop table row ── */
+  const TRow = ({ p }) => (
+    <tr>
+      <td className="font-semibold text-[#3B2316] whitespace-nowrap" style={{ fontFamily: "'Lora'" }}>
+        {CAT_ICON[p.category] || "📦"} {p.name}
+      </td>
+      <td>
+        <span className={`badge ${CAT_CLR[p.category] || "bg-[#F5E6C8] border-[#8B7355] text-[#5C3D2E]"}`}>
+          {p.category || "Umum"}
+        </span>
+      </td>
+      <td className="font-bold text-[#6B7B3A] whitespace-nowrap" style={{ fontFamily: "'Fredoka'" }}>
+        Rp {p.price?.toLocaleString("id-ID")}
+      </td>
+      <td>
+        <span className={`badge ${p.stock <= 5 ? "bg-[#FFF3E0] border-[#C04000] text-[#C04000]" : "bg-[#F0F7E8] border-[#6B7B3A] text-[#6B7B3A]"}`}>
+          <PackageCheck className="w-3.5 h-3.5" /> {p.stock}
+        </span>
+      </td>
+      <td className="text-right">
+        <div className="flex items-center justify-end gap-1">
+          <button onClick={() => startEdit(p)} className="btn btn-ic text-[#8B7355] hover:text-[#D4A843]">
+            <Edit3 className="w-4 h-4" />
+          </button>
+          <button onClick={() => del(p.id)} className="btn btn-ic text-[#8B7355] hover:text-[#C04000]">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+
+  /* ═══════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-800">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        {/* Header */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 flex flex-col items-center text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-orange-500/5 pointer-events-none" />
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-700 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-900/10 mb-3">
-            <Coffee className="w-7 h-7" />
+    <div className="page-wrap">
+
+      {/* ── HEADER ── */}
+      <header className="card text-center mb-5 sm:mb-6">
+        <div className="flo mx-auto mb-3 w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-full flex items-center justify-center border-[3px] border-[#3B2316]"
+          style={{ background: "linear-gradient(135deg, #C04000, #8B2500)" }}>
+          <Coffee className="w-6 h-6 sm:w-8 sm:h-8 text-[#FFF8E7]" />
+        </div>
+        <h1 className="text-2xl sm:text-[32px] font-bold text-[#3B2316] leading-tight"
+          style={{ fontFamily: "'Playfair Display', serif" }}>
+          ePOS Cafe Manager
+        </h1>
+        <p className="text-xs sm:text-sm text-[#8B7355] mt-1 italic"
+          style={{ fontFamily: "'Lora', serif" }}>
+          Kelola inventaris dan stok menu cafe Anda
+        </p>
+      </header>
+
+      {/* ── STATS ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        {stats.map((s, i) => (
+          <div key={i} className="stat">
+            <div className={`stat-ico ${s.clr}`}>
+              <s.icon className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="lbl">{s.label}</div>
+              <div className="text-lg sm:text-xl font-bold text-[#3B2316]" style={{ fontFamily: "'Fredoka'" }}>
+                {s.val}
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-            ePOS Cafe Manager
-          </h1>
-          <p className="text-sm text-slate-500 mt-1 max-w-md">
-            Kelola inventaris, kategori, dan stok menu cafe Anda secara *real-time*.
+        ))}
+      </div>
+
+      {/* ── MAIN ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-5 sm:gap-6 items-start">
+
+        {/* ── FORM ── */}
+        <div className="card lg:sticky lg:top-6 order-1">
+          <h2 className="text-base font-bold flex items-center gap-2 text-[#3B2316] mb-4"
+            style={{ fontFamily: "'Fredoka'" }}>
+            {editId
+              ? <><Edit3 className="w-[18px] h-[18px] text-[#C04000]" /> Edit Produk</>
+              : <><Plus className="w-[18px] h-[18px] text-[#6B7B3A]" /> Tambah Produk</>}
+          </h2>
+
+          {editId && (
+            <div className="mb-4 p-2.5 bg-[#FFF3E0] border-2 border-dashed border-[#D4A843] rounded-lg text-center">
+              <span className="text-xs font-semibold text-[#8B6914]" style={{ fontFamily: "'Fredoka'" }}>
+                ✏️ Sedang mengedit
+              </span>
+            </div>
+          )}
+
+          <form onSubmit={submit} className="flex flex-col gap-3.5">
+            <div>
+              <label className="lbl">Nama Produk</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                placeholder="Avocado Coffee" className="inp" required />
+            </div>
+            <div>
+              <label className="lbl">Kategori</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="sel">
+                {CATS.map((c) => <option key={c} value={c}>{CAT_ICON[c]} {c}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="lbl">Harga (Rp)</label>
+                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)}
+                  placeholder="25000" className="inp" required />
+              </div>
+              <div>
+                <label className="lbl">Stok</label>
+                <input type="number" value={stock} onChange={(e) => setStock(e.target.value)}
+                  placeholder="20" className="inp" required />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button type="submit" disabled={busy}
+                className={`btn flex-1 ${editId ? "btn-y" : "btn-g"}`}>
+                {busy ? "Menyimpan..." : editId
+                  ? <><Save className="w-4 h-4" /> Perbarui</>
+                  : <><Plus className="w-4 h-4" /> Tambah</>}
+              </button>
+              {editId && (
+                <button type="button" onClick={cancel} className="btn btn-m">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* ── PRODUCT LIST ── */}
+        <div className="flex flex-col gap-4 order-2">
+
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#8B7355]" />
+            <input type="text" placeholder="Cari nama produk..."
+              value={search} onChange={(e) => setSearch(e.target.value)}
+              className="inp pl-11" />
+          </div>
+
+          {/* Category pills */}
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setCatFilter("Semua")}
+              className={`pill ${catFilter === "Semua" ? "on" : ""}`}>
+              📋 Semua
+            </button>
+            {CATS.map((c) => (
+              <button key={c} onClick={() => setCatFilter(c)}
+                className={`pill ${catFilter === c ? "on" : ""}`}>
+                {CAT_ICON[c]} {c}
+              </button>
+            ))}
+          </div>
+
+          {/* ── MOBILE: product cards ── */}
+          <div className="lg:hidden flex flex-col gap-3">
+            {list.length === 0 ? <Empty /> : list.map((p) => <MobCard key={p.id} p={p} />)}
+          </div>
+
+          {/* ── DESKTOP: table ── */}
+          <div className="hidden lg:block card" style={{ padding: 0, overflow: "hidden" }}>
+            <div className="overflow-x-auto">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Produk</th>
+                    <th>Kategori</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th className="text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.length === 0 ? (
+                    <tr><td colSpan="5"><Empty /></td></tr>
+                  ) : list.map((p) => <TRow key={p.id} p={p} />)}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-xs text-[#B8A08A] italic" style={{ fontFamily: "'Lora'" }}>
+            ePOS Cafe Manager — Dibuat dengan ♥
           </p>
         </div>
-
-        {/* Dynamic Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-colors">
-            <div className="p-3.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-100">
-              <ShoppingBag className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Produk</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{products.length}</h3>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-colors">
-            <div className="p-3.5 rounded-xl bg-teal-50 text-teal-700 border border-teal-100">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{totalCategories}</h3>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-colors">
-            <div className="p-3.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-100">
-              <PackageCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Stok</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{totalStock}</h3>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4 hover:border-slate-300 transition-colors">
-            <div className={`p-3.5 rounded-xl border ${lowStockCount > 0 ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}>
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Stok Menipis</p>
-              <h3 className={`text-2xl font-bold mt-0.5 ${lowStockCount > 0 ? "text-rose-600" : "text-slate-900"}`}>
-                {lowStockCount}
-              </h3>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Form Panel */}
-          <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:sticky lg:top-8">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                {editingId ? (
-                  <>
-                    <Edit3 className="w-5 h-5 text-amber-600" /> Edit Produk
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-5 h-5 text-emerald-600" /> Tambah Produk
-                  </>
-                )}
-              </h2>
-              {editingId && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                  Mode Edit
-                </span>
-              )}
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                  Nama Produk
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Avocado Coffee"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                  Kategori
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all cursor-pointer"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {CATEGORY_ICONS[c]} {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                    Harga (Rp)
-                  </label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="25000"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                    Stok
-                  </label>
-                  <input
-                    type="number"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    placeholder="20"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    editingId
-                      ? "bg-amber-600 hover:bg-amber-700 focus:ring-amber-500"
-                      : "bg-slate-900 hover:bg-slate-800 focus:ring-slate-900"
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : editingId ? (
-                    <>
-                      <Save className="w-4 h-4" /> Perbarui
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" /> Tambah
-                    </>
-                  )}
-                </button>
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-
-          {/* Product List Panel */}
-          <div className="lg:col-span-8 space-y-4">
-            
-            {/* Filter and Search Controls */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Cari nama produk..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                <button
-                  onClick={() => setSelectedCategory("Semua")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    selectedCategory === "Semua"
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  📋 Semua
-                </button>
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setSelectedCategory(c)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      selectedCategory === c
-                        ? "bg-slate-900 text-white shadow-sm"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {CATEGORY_ICONS[c]} {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Mobile View (Cards) */}
-            <div className="md:hidden space-y-3">
-              {filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 text-center border border-slate-200/80">
-                  <p className="text-3xl mb-2">📭</p>
-                  <p className="text-sm font-semibold text-slate-700">Tidak ada produk ditemukan</p>
-                  <p className="text-xs text-slate-400 mt-1">Coba sesuaikan pencarian atau kata kunci filter Anda.</p>
-                </div>
-              ) : (
-                filtered.map((p) => (
-                  <div key={p.id} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="font-semibold text-slate-900 text-base">
-                          {CATEGORY_ICONS[p.category] || "📦"} {p.name}
-                        </span>
-                        <div className="mt-1">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${CATEGORY_BADGE[p.category] || "bg-slate-100 text-slate-700"}`}>
-                            {p.category || "Umum"}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-sm font-bold text-slate-900 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                        Rp {p.price?.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border ${
-                        p.stock <= 5 
-                          ? "bg-rose-50 text-rose-700 border-rose-200" 
-                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      }`}>
-                        <PackageCheck className="w-3.5 h-3.5" />
-                        Stok: {p.stock}
-                      </span>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleEdit(p)}
-                          className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                          title="Edit"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Desktop Table View */}
-            <div className="hidden md:block bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Produk</th>
-                      <th className="py-3.5 px-4">Kategori</th>
-                      <th className="py-3.5 px-4">Harga</th>
-                      <th className="py-3.5 px-4">Stok</th>
-                      <th className="py-3.5 px-4 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-sm">
-                    {filtered.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="text-center py-12">
-                          <div className="flex flex-col items-center justify-center gap-1">
-                            <span className="text-3xl mb-1">📭</span>
-                            <p className="text-slate-700 font-medium">Tidak ada produk ditemukan</p>
-                            <p className="text-xs text-slate-400">Coba kata kunci lain atau ubah filter kategori.</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      filtered.map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-3.5 px-4 font-semibold text-slate-900">
-                            {CATEGORY_ICONS[p.category] || "📦"} {p.name}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${CATEGORY_BADGE[p.category] || "bg-slate-100 border-slate-200 text-slate-700"}`}>
-                              {p.category || "Umum"}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 font-semibold text-slate-900">
-                            Rp {p.price?.toLocaleString("id-ID")}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                              p.stock <= 5 
-                                ? "bg-rose-50 text-rose-700 border-rose-200" 
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            }`}>
-                              <PackageCheck className="w-3.5 h-3.5" />
-                              {p.stock}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => handleEdit(p)}
-                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                                title="Edit"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(p.id)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                title="Hapus"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <p className="text-center text-xs text-slate-400 pt-2">
-              ePOS Cafe Manager — Designed for Efficiency
-            </p>
-          </div>
-        </div>
-
       </div>
     </div>
   );
