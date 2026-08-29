@@ -237,3 +237,98 @@ input[type="number"] { -moz-appearance: textfield; }
   50% { transform: translateY(-4px); }
 }
 .v-float { animation: float 3s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE & MOBILE
+   ═══════════════════════════════════════════ */
+
+/* Touch-friendly targets */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile card layout (shown below md, hidden on md+) */
+.v-mob-card {
+  background: var(--paper);
+  border: 2.5px solid var(--brown);
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 var(--brown);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v-mob-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.v-mob-card-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+}
+.v-mob-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.v-mob-card-actions button {
+  min-width: 38px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 2px solid var(--brown);
+  transition: all 0.15s;
+}
+.v-mob-card-actions .v-mob-edit {
+  background: var(--gold);
+  color: var(--brown-dark);
+}
+.v-mob-card-actions .v-mob-delete {
+  background: #F5E0DE;
+  color: var(--sienna);
+  border-color: var(--sienna);
+}
+
+/* Stat card compact on mobile */
+@media (max-width: 640px) {
+  .v-stat {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .v-stat .w-10.h-10 {
+    width: 36px;
+    height: 36px;
+  }
+  .v-stat .text-xl {
+    font-size: 18px;
+  }
+  .v-label {
+    font-size: 10px;
+  }
+}
+
+/* Reduce page padding on mobile */
+@media (max-width: 480px) {
+  .v-card {
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 3px 3px 0 var(--brown);
+  }
+  .v-card.v-card-flush {
+    padding: 0;
+    border-radius: 14px;
+  }
+}
